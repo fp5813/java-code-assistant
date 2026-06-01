@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 核心 Agent 循环：perceive → think → act。
@@ -118,46 +120,30 @@ public class AgentLoop {
 
             if (!aiMessage.hasToolExecutionRequests()) {
                 String text = aiMessage.text();
-                return new AgentResponse(text != null && !text.isBlank() ? text : "(无文本回复)",
+                if (text == null || text.isBlank()) {
+                    return new AgentResponse("(无文本回复)",
+                        context.getInputTokens(), context.getOutputTokens(),
+                        context.getTotalToolCalls());
+                }
+
+                // ── 兼容 Qwen 等模型的 JSON 文本工具调用格式 ──
+                // 模型以 JSON 文本形式输出工具调用（而非原生 tool_calls 协议）
+                List<ToolExecutionRequest> parsedRequests = parseJsonToolCalls(text);
+                if (!parsedRequests.isEmpty()) {
+                    LOG.info("从 JSON 文本中解析出 {} 个工具调用", parsedRequests.size());
+                    // 用解析出的请求替换原消息（移除 JSON 文本消息）
+                    executeToolRequests(parsedRequests);
+                    continue; // 继续 think-act 循环
+                }
+
+                // ── 普通文本回复 ──
+                return new AgentResponse(text,
                     context.getInputTokens(), context.getOutputTokens(),
                     context.getTotalToolCalls());
             }
 
-            // ── ACT: 工具编排 ──
-            List<ToolExecutionRequest> requests = aiMessage.toolExecutionRequests();
-
-            // 分组：只读工具并发，写工具串行
-            List<ToolExecutionRequest> readOnlyRequests = new ArrayList<>();
-            List<ToolExecutionRequest> writeRequests = new ArrayList<>();
-
-            for (ToolExecutionRequest req : requests) {
-                Tool<?, ?> tool = toolRegistry.getTool(req.name());
-                if (tool != null && tool.isReadOnly()) {
-                    readOnlyRequests.add(req);
-                } else {
-                    writeRequests.add(req);
-                }
-            }
-
-            // ── 执行只读工具（并发） ──
-            if (!readOnlyRequests.isEmpty()) {
-                Map<String, ToolResult> readResults = executeConcurrently(readOnlyRequests);
-                for (ToolExecutionRequest req : readOnlyRequests) {
-                    ToolResult result = readResults.get(req.id());
-                    context.recordToolCall();
-                    messages.add(new ToolExecutionResultMessage(
-                        req.id(), req.name(), result.toMessageContent()));
-                }
-            }
-
-            // ── 执行写工具（串行） ──
-            for (ToolExecutionRequest req : writeRequests) {
-                ToolResult result = executeTool(req);
-                context.recordToolCall();
-                messages.add(new ToolExecutionResultMessage(
-                    req.id(), req.name(), result.toMessageContent()));
-            }
-
+            // ── ACT: 执行原生 tool_calls ──
+            executeToolRequests(aiMessage.toolExecutionRequests());
             // 继续循环
         }
 
@@ -232,6 +218,101 @@ public class AgentLoop {
             long duration = System.currentTimeMillis() - startTime;
             LOG.error("工具 {} 执行异常: {}", toolName, e.getMessage(), e);
             return ToolResult.failure("内部错误: " + e.getMessage(), duration);
+        }
+    }
+
+    /**
+     * 从模型文本回复中解析 JSON 格式的工具调用。
+     * 兼容 Qwen 等以文本形式输出工具调用（而非原生 tool_calls 协议）的模型。
+     *
+     * <p>匹配格式：</p>
+     * <pre>
+     * {
+     *   "name": "ToolName",
+     *   "arguments": { "param1": "value1" }
+     * }
+     * </pre>
+     * 支持在 ```json ... ``` 代码块中或裸 JSON。
+     */
+    static List<ToolExecutionRequest> parseJsonToolCalls(String text) {
+        if (text == null || text.isBlank()) return List.of();
+
+        List<ToolExecutionRequest> results = new ArrayList<>();
+        int idCounter = 0;
+
+        // 模式：匹配 JSON 对象中包含 "name" 和 "arguments" 键
+        // 先尝试从 ```json ... ``` 代码块中提取
+        Pattern codeBlockPattern = Pattern.compile(
+            "```(?:json)?\\s*\\{\\s*\"name\"\\s*:\\s*\"(\\w+)\"\\s*,?\\s*\"arguments\"\\s*:\\s*(\\{.+?\\})\\s*\\}\\s*```",
+            Pattern.DOTALL);
+        Matcher m = codeBlockPattern.matcher(text);
+        while (m.find()) {
+            String toolName = m.group(1);
+            String argsJson = m.group(2).trim();
+            // 移除尾部可能的逗号
+            if (argsJson.endsWith(",")) argsJson = argsJson.substring(0, argsJson.length() - 1);
+            results.add(ToolExecutionRequest.builder()
+                .id("qwen-" + (idCounter++))
+                .name(toolName)
+                .arguments(argsJson)
+                .build());
+        }
+
+        // 如果没有找到代码块中的，尝试裸 JSON
+        if (results.isEmpty()) {
+            Pattern barePattern = Pattern.compile(
+                "\\{\\s*\"name\"\\s*:\\s*\"(\\w+)\"\\s*,?\\s*\"arguments\"\\s*:\\s*(\\{.+?\\})\\s*\\}",
+                Pattern.DOTALL);
+            Matcher bm = barePattern.matcher(text);
+            while (bm.find()) {
+                String toolName = bm.group(1);
+                String argsJson = bm.group(2).trim();
+                if (argsJson.endsWith(",")) argsJson = argsJson.substring(0, argsJson.length() - 1);
+                results.add(ToolExecutionRequest.builder()
+                    .id("qwen-" + (idCounter++))
+                    .name(toolName)
+                    .arguments(argsJson)
+                    .build());
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * 执行工具请求列表（含编排：只读并发，写串行）。
+     */
+    private void executeToolRequests(List<ToolExecutionRequest> requests) {
+        // 分组：只读工具并发，写工具串行
+        List<ToolExecutionRequest> readOnlyRequests = new ArrayList<>();
+        List<ToolExecutionRequest> writeRequests = new ArrayList<>();
+
+        for (ToolExecutionRequest req : requests) {
+            Tool<?, ?> tool = toolRegistry.getTool(req.name());
+            if (tool != null && tool.isReadOnly()) {
+                readOnlyRequests.add(req);
+            } else {
+                writeRequests.add(req);
+            }
+        }
+
+        // ── 只读工具（并发） ──
+        if (!readOnlyRequests.isEmpty()) {
+            Map<String, ToolResult> readResults = executeConcurrently(readOnlyRequests);
+            for (ToolExecutionRequest req : readOnlyRequests) {
+                ToolResult result = readResults.get(req.id());
+                context.recordToolCall();
+                messages.add(new ToolExecutionResultMessage(
+                    req.id(), req.name(), result.toMessageContent()));
+            }
+        }
+
+        // ── 写工具（串行） ──
+        for (ToolExecutionRequest req : writeRequests) {
+            ToolResult result = executeTool(req);
+            context.recordToolCall();
+            messages.add(new ToolExecutionResultMessage(
+                req.id(), req.name(), result.toMessageContent()));
         }
     }
 
