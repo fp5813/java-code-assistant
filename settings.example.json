@@ -1,0 +1,28 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key-here",
+    "ANTHROPIC_MODEL": "deepseek-chat"
+  },
+  "model": "deepseek-chat",
+  "providers": {
+    "openai": {
+      "baseUrl": "https://api.openai.com/v1",
+      "apiKey": "sk-your-openai-key",
+      "models": ["gpt-4o", "gpt-4o-mini"],
+      "description": "OpenAI API"
+    },
+    "deepseek": {
+      "baseUrl": "https://api.deepseek.com",
+      "apiKey": "sk-your-deepseek-key",
+      "models": ["deepseek-chat", "deepseek-coder", "deepseek-reasoner"],
+      "description": "DeepSeek API"
+    },
+    "kiro": {
+      "baseUrl": "https://api.kiro.ai/v1",
+      "apiKey": "sk-your-kiro-key",
+      "models": ["claude-sonnet-4", "claude-haiku-4"],
+      "description": "Kiro API (Claude 模型)"
+    }
+  }
+}

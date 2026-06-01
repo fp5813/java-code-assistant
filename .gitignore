@@ -1,0 +1,36 @@
+# Java Code Assistant
+
+# Maven build output
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.project
+*.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+*.log
+logs/
+
+# Runtime
+.env
+.cache/
+*.bak
+
+# Generated HTML reports
+.ca-html-output/
+
+# Session / task / memory data (user-specific)
+.ca/
