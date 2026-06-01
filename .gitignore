@@ -32,5 +32,8 @@ logs/
 # Generated HTML reports
 .ca-html-output/
 
+# Maven shade plugin artifact
+dependency-reduced-pom.xml
+
 # Session / task / memory data (user-specific)
 .ca/
