@@ -9,7 +9,7 @@
                                                                                                                            
 ```
 
-### Java AI 编程助手
+### 墨码 (MoMa) — AI 编程助手
 
 [![Java](https://img.shields.io/badge/Java-21%2B-orange?logo=openjdk)](https://openjdk.org)
 [![LangChain4j](https://img.shields.io/badge/LangChain4j-0.36.2-blue?logo=java)](https://github.com/langchain4j/langchain4j)
@@ -20,7 +20,7 @@
 
 </div>
 
-基于 **Java 21** + **LangChain4j** 构建的终端 AI 编程助手。具备完整的 **感知-思考-行动 (perceive-think-act)** Agent 闭环，支持多 Provider 热切换，内置 20+ 开发工具。
+**墨码 (MoMa)** — 以 AI 为笔，挥洒自如地编写代码。基于 **Java 21** + **LangChain4j** 构建的终端 AI 编程助手，具备完整的 **感知-思考-行动 (perceive-think-act)** Agent 闭环，支持多 Provider 热切换，内置 20+ 开发工具。
 
 参考了 Claude Code / MiniClaude 的架构设计。
 
@@ -67,7 +67,7 @@ ANTHROPIC_MODEL=qwen2.5-coder:7b
 ### 启动
 
 ```bash
-java -jar target/java-code-assistant.jar
+java -jar target/moma.jar
 # Windows: 双击 start.bat
 ```
 
@@ -156,7 +156,7 @@ java -jar target/java-code-assistant.jar
 ```bash
 mvn clean compile                      # 编译
 mvn package -DskipTests                # 打包 fat JAR
-java -jar target/java-code-assistant.jar  # 运行
+java -jar target/moma.jar  # 运行
 ```
 
 ---

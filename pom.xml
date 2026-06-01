@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.codeassist</groupId>
-    <artifactId>java-code-assistant</artifactId>
+    <groupId>com.moma</groupId>
+    <artifactId>moma</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Java Code Assistant</name>
-    <description>轻量级本地 AI 编程助手 — 基于 LangChain4j 的智能体实现</description>
+    <name>墨码 (MoMa)</name>
+    <description>墨码 — 以 AI 为笔，挥洒自如地编写代码。基于 LangChain4j 的智能体实现。</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -72,10 +72,24 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Redis 客户端（可选，不可用时自动降级） -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+
+        <!-- 连接池（Jedis 需要） -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.12.0</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <finalName>java-code-assistant</finalName>
+        <finalName>moma</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,7 +114,7 @@
                             <minimizeJar>false</minimizeJar>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.codeassist.CodeAssistant</mainClass>
+                                    <mainClass>com.moma.CodeAssistant</mainClass>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>

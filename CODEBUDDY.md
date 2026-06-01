@@ -10,7 +10,7 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 | `mvn package -DskipTests` | 打包为 fat JAR（含所有依赖） |
 | `mvn test` | 运行测试 |
 | `mvn clean compile` | 清理并编译 |
-| `java -jar target/java-code-assistant.jar` | 运行项目（需先配置 API Key） |
+| `java -jar target/moma.jar` | 运行墨码（需先配置 API Key） |
 | `start.bat` | Windows 快捷启动 |
 
 ## 配置
@@ -60,7 +60,7 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 基于 LangChain4j 的 AI 编程助手，核心为 perceive-think-act 闭环。
 
 ```
-src/main/java/com/codeassist/
+src/main/java/com/moma/
 ├── CodeAssistant.java         # 主入口
 ├── cli/
 │   ├── CliApp.java            # JLine REPL 交互循环

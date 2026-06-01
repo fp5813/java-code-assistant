@@ -9,16 +9,18 @@
                                                                                                                            
 ```
 
-### AI Coding Assistant in Java
+### 墨码 (MoMa) — AI Coding Assistant
 
 [![Java](https://img.shields.io/badge/Java-21%2B-orange?logo=openjdk)](https://openjdk.org)
 [![LangChain4j](https://img.shields.io/badge/LangChain4j-0.36.2-blue?logo=java)](https://github.com/langchain4j/langchain4j)
 [![Maven](https://img.shields.io/badge/Maven-3.9%2B-red?logo=apache-maven)](https://maven.apache.org)
 [![License](https://img.shields.io/badge/License-MIT-1ba784)](LICENSE)
 
+[中文](README_ZH.md) | **English**
+
 </div>
 
-An AI-powered terminal coding assistant built with **Java 21** and **LangChain4j** — featuring a full **perceive-think-act** agent loop, multi-provider hot-switching, and 20+ developer tools.
+**墨码 (MoMa)** — Write code with AI as your brush. An AI-powered terminal coding assistant built with **Java 21** and **LangChain4j** — featuring a full **perceive-think-act** agent loop, multi-provider hot-switching, and 20+ developer tools.
 
 Inspired by the architecture of Claude Code / MiniClaude.
 
@@ -65,7 +67,7 @@ ANTHROPIC_MODEL=qwen2.5-coder:7b
 #### Start the REPL
 
 ```bash
-java -jar target/java-code-assistant.jar
+java -jar target/moma.jar
 # Or on Windows: double-click start.bat
 ```
 
@@ -266,7 +268,7 @@ mvn package -DskipTests        # fat JAR
 # Run with local Ollama
 cp .env.example .env
 # edit .env: set ANTHROPIC_BASE_URL=http://localhost:11434/v1
-java -jar target/java-code-assistant.jar
+java -jar target/moma.jar
 
 # Run from source
 mvn exec:java -Dexec.mainClass="com.codeassist.CodeAssistant"
