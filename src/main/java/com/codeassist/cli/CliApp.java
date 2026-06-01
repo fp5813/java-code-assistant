@@ -126,6 +126,11 @@ public class CliApp {
         // LSP 诊断
         toolRegistry.register(new LspTool());
 
+        // GitHub CLI 工具
+        toolRegistry.register(new GhPrCreateTool());
+        toolRegistry.register(new GhPrListTool());
+        toolRegistry.register(new GhIssueListTool());
+
         // ── 初始化 Agent 上下文 ──
         String cwd = System.getProperty("user.dir");
         this.agentContext = new AgentContext(cwd, null, providerRegistry.getActiveModel());
