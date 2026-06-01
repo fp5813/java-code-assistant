@@ -250,7 +250,7 @@ TaskUpdate(taskId, status/result)→ 更新任务状态或标记完成/失败
 支持文件类型: .java (jdtls)、.ts/.js (typescript-language-server)、.py (pylsp)。
 通过 JSON-RPC 协议实现 LSP 客户端通信。需在系统中安装相应的语言服务器。
 
-### 当前工具总表 (21 个)
+### 当前工具总表 (23 个)
 
 | Phase | 工具列表 |
 |-------|---------|
@@ -260,3 +260,7 @@ TaskUpdate(taskId, status/result)→ 更新任务状态或标记完成/失败
 | 4 | TaskCreate, TaskList, TaskUpdate, TaskGet, EnterPlanMode, ExitPlanMode |
 | 5 | GitDiff, GitStatus, GitCommit, Skill, (HardDeny 安全层) |
 | 6 | MemorySave, MemorySearch, HtmlOutput, Lsp |
+| 7 | GhPrCreate, GhPrList, GhIssueList |
+
+**本地模型**: `qwen2.5-coder:7b`（Ollama，~4.7GB）<br>
+**已清理**: qwen3.6-35b-a3b（23GB）、qwen2.5-coder:0.5b、qwen2.5-coder:1.5b
