@@ -22,6 +22,12 @@ references:
 
 ## 流程
 
+### 5.0 读取工作流状态
+
+1. Read `.codebuddy/workflow/state.yaml`，验证 `phase.current == "phase-5-code"`
+2. 验证前置制品存在：`artifacts.plan.path` 对应的文件存在，`artifacts.gate_4_5.status == "passed"`
+3. 设置 `phase.status = "in_progress"`, `phase.started_at = 当前时间`
+
 ### 5.1 影响范围自检（修改前逐项确认）
 
 | 检查项 | 问题 |
@@ -54,6 +60,8 @@ references:
 
 **Agent BE**: 后端修改 — 按计划逐一执行，每完成一个任务打勾。验证：在 IDE 中编译验证
 
+> **上下文提示**：子代理返回主会话时，输出格式限定为"任务完成清单 + 关键决策点"的摘要形式（每代理 ≤1K tokens），避免完整对话日志填充主会话上下文。
+
 ### 5.4 合并验证
 
 | 验证项 | 方法 | 通过条件 |
@@ -73,3 +81,14 @@ references:
 ## 约束
 
 - 严格按计划执行，不自行增删任务。最小修改（不改无关代码）。不改规格。不引入新依赖（除非计划中明确）。
+- **Phase 5.5 退回处理**：如审核发现代码问题退回 Phase 5，优先修复退回项，依次处理。如修复涉及计划外任务，在修改记录中标注"Phase 5.5 退回修复"并简要说明原因，无需更新实施计划。最小修改原则在退回修复时略微放宽，允许修复与退回项直接相关的紧邻代码异味。
+
+### Phase 出口
+
+1. 更新 `artifacts.code_changes` 列表（记录每个修改文件的 path/type/summary）
+2. Phase 出口：
+   - `phase.status = "completed"`, `phase.completed_at = 当前时间`
+   - `progress.phases_completed.append("phase-5-code")`
+   - `phase.current = "phase-5.5-review"`, `phase.status = "pending"`
+   - `metrics_snapshot.phase_durations[phase-5-code] = 耗时分钟数`
+3. 更新 `session.last_activity = 当前时间`

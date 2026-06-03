@@ -1,0 +1,55 @@
+# ============================================
+# state.yaml 验证规则 v2
+# ============================================
+# 每个 state.yaml 必须满足以下规则
+# 由 Phase 入口/出口自检时验证
+
+rules:
+  - id: R1
+    description: "phase.current 必须是已定义的 Phase ID"
+    validation: >
+      phase.current in [null, phase-1-clarify, phase-2-probe,
+      phase-2.5-quality-gate, phase-3-spec, phase-4-plan,
+      phase-4.5-coverage-check, phase-5-code, phase-5.5-review,
+      phase-6-record, phase-6.7-retrospect, phase-6.5-rule-sync,
+      phase-6.6-audit]
+
+  - id: R2
+    description: "phase.status = in_progress 时 started_at 不能为 null"
+    validation: if phase.status == "in_progress" then phase.started_at is not null
+
+  - id: R3
+    description: "制品 path 不能指向不存在的文件（Phase 自检验证）"
+    validation: for each artifact with path != null, file exists
+
+  - id: R4
+    description: "已完成阶段必须有 completed_at"
+    validation: if phase.status == "completed" then phase.completed_at is not null
+
+  - id: R5
+    description: "决策引用路径不重复"
+    validation: all decisions.*.ref are unique
+
+  - id: R6
+    description: "门控状态只能为 passed 或 failed（二值判定，不允许 warning）"
+    validation: for each gate in [gate_2_5, gate_4_5, gate_3, gate_5], gate.status in [null, "passed", "failed"]
+
+  - id: R7
+    description: "门控计数一致性"
+    validation: gates_summary.total == gates_summary.[passed + failed + skipped]
+
+  - id: R8
+    description: "progress.phases_completed 中的 Phase ID 必须有对应的入口/出口记录"
+    validation: for each pid in progress.phases_completed, metrics_snapshot.phase_durations[pid] exists or phase.current == pid
+
+  - id: R9
+    description: "Gate 2.5 通过时 score 必须为 100"
+    validation: if artifacts.gate_2_5.status == "passed" then artifacts.gate_2_5.score == 100
+
+  - id: R10
+    description: "Gate 4.5 通过时 failed_items 必须为空"
+    validation: if artifacts.gate_4_5.status == "passed" then artifacts.gate_4_5.failed_items is empty
+
+  - id: R11
+    description: "Gate 5 通过时扫描类别 ≥ 6"
+    validation: if artifacts.gate_5.status == "passed" then artifacts.gate_5.categories_scanned >= 6

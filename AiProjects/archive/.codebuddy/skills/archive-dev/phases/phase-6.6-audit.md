@@ -1,7 +1,7 @@
 ---
 name: archive-dev/phases/phase-6.6-audit
-description: "业务规则审计：codegraph 扫描全项目业务逻辑模式（状态判断/枚举/权限/数据过滤），识别未归档规则并输出审计报告。"
-version: 1.1.0
+description: "业务规则审计：codegraph 扫描全项目 6 类业务规则模式（状态判断/枚举/权限/数据过滤），全覆盖识别未归档规则并输出审计报告。"
+version: 1.2.0
 tags: [archive, codebuddy-only, audit, business-rule, read-only]
 role: codebuddy-auditor
 model: deepseek-v4-flash
@@ -16,11 +16,16 @@ references:
 
 ## 职责
 
-**输入**：无（独立运行，不依赖 BUG/需求）  
+**输入**：Phase 6.5 输出的业务规则状态 + Phase 5 代码变更范围（不依赖 BUG/需求）  
 **输出**：`docs/业务规则/审计/YYYY-MM-DD-审计报告.md`  
 **模式**：只读（不修改源代码）
 
 ## 流程
+
+### Step 0: 读取工作流状态
+
+1. Read `.codebuddy/workflow/state.yaml`，验证 `phase.current == "phase-6.6-audit"`
+2. 设置 `phase.status = "in_progress"`, `phase.started_at = 当前时间`
 
 ### Step 1: 确定审计范围
 
@@ -58,9 +63,20 @@ references:
 ## 自检
 
 - [ ] 已确定审计范围
-- [ ] 已完成 ≥3 类业务模式扫描（强制）
+- [ ] 已完成 6 类业务模式全覆盖扫描（强制）
 - [ ] 已与已有规则对比
 - [ ] 报告已输出
+
+### Phase 出口
+
+1. 更新 `artifacts.audit_report.path`, `artifacts.gate_5.status`, `artifacts.gate_5.failed_items`
+2. Phase 出口：
+   - `phase.status = "completed"`, `phase.completed_at = 当前时间`
+   - `progress.phases_completed.append("phase-6.6-audit")`
+   - `phase.current = null`, `phase.status = "completed"`（工作流结束）
+   - `metrics_snapshot.phase_durations[phase-6.6-audit] = 耗时分钟数`
+3. `gates_summary` 更新计数
+4. 更新 `session.last_activity = 当前时间`
 
 ## 复盘衔接
 

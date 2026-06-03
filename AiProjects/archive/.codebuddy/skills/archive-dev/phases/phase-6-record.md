@@ -6,13 +6,12 @@ tags: [archive, codebuddy-only, record, documentation]
 role: codebuddy-recorder
 model: deepseek-v4-flash
 tools: [Read, Grep]
-references:
-  - ../references/change-record-detailed.md
+references: []
 ---
 
 # Phase 6: 修改记录
 
-> 每次修改必须留下可追溯的记录。
+> 修改记录模板详见 `docs/修改记录/TEMPLATE.md`。本文件仅说明与模板的差异点。
 
 ## 职责
 
@@ -21,6 +20,18 @@ references:
 **模式**：只读（除新建记录文件外）
 
 ## 流程
+
+### Step -1: 读取工作流状态
+
+1. Read `.codebuddy/workflow/state.yaml`，验证 `phase.current == "phase-6-record"`
+2. 验证前置制品存在：`artifacts.code_changes` 非空，`artifacts.gate_3.status == "passed"`
+3. 设置 `phase.status = "in_progress"`, `phase.started_at = 当前时间`
+
+### Step 0: 上下文检查（可选）
+
+Phase 6 生成的修改记录含完整代码 diff（20-40K tokens），是上下文增长最大的阶段。建议：
+- 运行 `/context` 检查当前上下文使用率
+- 如已超过 100K，执行 `/compact 保留探路摘要+AC清单+修改范围` 后继续
 
 ### Step 1: 列出所有修改
 
@@ -38,7 +49,22 @@ references:
 
 **纳入 Phase 5.5 审核结论**：将文档代码审核结果追加到修改记录的末尾章节。写入 `docs/修改记录/YYYY-MM-DD-{功能简述}.md`。
 
-### Step 5: 更新修改记录索引
+### Step 5: 追加验证变更日志（新增）
+
+如本次开发过程中存在 Phase 6 之后的验证→回退→修复循环，在修改记录末尾追加"验证变更日志"章节：
+
+```markdown
+## 验证变更日志
+
+| 轮次 | 发现 | 修复 | 回退阶段 |
+|------|------|------|---------|
+| 1 | {用户测试发现的第一个问题} | {具体修复内容} | Phase 5 |
+| 2 | {发现更复杂的问题（如再次修改无反应）} | {修复内容} | Phase 5 |
+```
+
+无验证循环时跳过此步。
+
+### Step 6: 更新修改记录索引
 
 在 `docs/修改记录/INDEX.md` 表**顶部**插入新行。格式：
 
@@ -57,7 +83,7 @@ references:
 |------|------|
 | Q1: 是否为 BUG 修复？ | [ ] 是 / [ ] 否 |
 | Q2: Phase 5.5 是否有 ⚠️ 建议项？ | [ ] 是 / [ ] 否 |
-| Q3: Phase 2.5/4.5 是否降级通过？ | [ ] 是 / [ ] 否 |
+| Q3: 是否有门控失败重试（Phase 2.5/4.5/5.5）？ | [ ] 是 / [ ] 否 |
 | Q4: 本次修改是否引入了新的设计模式或约定？ | [ ] 是 / [ ] 否 |
 **判定**：任一"是"→ 继续 Phase 6.7 复盘回顾 | 全部"否"→ 直接进入 Phase 6.5
 **触发原因**：{说明触发来源}
@@ -99,3 +125,14 @@ references:
 ## 约束
 
 - 绝不修改源文件。不使用 git 命令（用"定位行→替换"方式）。精确行号。
+
+### Phase 出口
+
+1. 更新 `artifacts.change_record.path`, `artifacts.change_record.updated_at`
+2. Phase 出口：
+   - `phase.status = "completed"`, `phase.completed_at = 当前时间`
+   - `progress.phases_completed.append("phase-6-record")`
+   - 复盘触发时：`artifacts.retrospect.triggered = true`, `artifacts.retrospect.trigger_reason = "复盘四问触发"`, `phase.current = "phase-6.7-retrospect"`, `phase.status = "pending"`
+   - 复盘未触发时：`phase.current = "phase-6.5-rule-sync"`, `phase.status = "pending"`
+   - `metrics_snapshot.phase_durations[phase-6-record] = 耗时分钟数`
+3. 更新 `session.last_activity = 当前时间`
