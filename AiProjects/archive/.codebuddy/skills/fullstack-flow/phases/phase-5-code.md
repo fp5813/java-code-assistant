@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-5-code
+name: fullstack-flow/phases/phase-5-code
 description: "最小修改：按实施计划执行，FE/BE 并行子代理，过影响范围自检，在 IDE 中编译验证。"
 version: 2.1.0
-tags: [archive, codebuddy-only, code, implementation]
+tags: [fullstack, codebuddy-only, code, implementation]
 role: codebuddy-coder
 model: deepseek-v4-pro
 tools: [Read, Write, Edit, Grep, Agent]

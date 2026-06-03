@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-6.7-retrospect
+name: fullstack-flow/phases/phase-6.7-retrospect
 description: "复盘回顾：混合触发式复盘（轻量检查+五维分析+根因分析），输出复盘文档并执行技能改进沉淀。"
 version: 1.0.0
-tags: [archive, codebuddy-only, review, retrospective, improvement]
+tags: [fullstack, codebuddy-only, review, retrospective, improvement]
 role: codebuddy-recorder
 model: deepseek-v4-flash
 tools: [Read, Write, Edit, Grep, Agent]
@@ -161,8 +161,7 @@ references:
 3. Phase 出口：
    - `phase.status = "completed"`, `phase.completed_at = 当前时间`
    - `progress.phases_completed.append("phase-6.7-retrospect")`
-   - 复盘后有阶段需执行时：`phase.current = "phase-6.5-rule-sync"`, `phase.status = "pending"`
-   - 复盘无后续阶段时：`phase.current = null`, `phase.status = "completed"`（工作流结束）
+   - `phase.current = "phase-6.5-rule-sync"`, `phase.status = "pending"`
    - `metrics_snapshot.phase_durations[phase-6.7-retrospect] = 耗时分钟数`
 4. `session.last_activity = 当前时间`
 

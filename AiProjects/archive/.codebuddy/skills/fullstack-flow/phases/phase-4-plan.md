@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-4-plan
+name: fullstack-flow/phases/phase-4-plan
 description: "实施计划：读取规格文档，分解为 T### [P] 标准化任务清单，标注 AC 覆盖和依赖关系。只读模式。"
 version: 2.1.0
-tags: [archive, codebuddy-only, spec-driven, read-only]
+tags: [fullstack, codebuddy-only, spec-driven, read-only]
 role: codebuddy-planner
 model: deepseek-v4-flash
 tools: [Read, Grep, Agent]
@@ -21,6 +21,12 @@ references:
 **模式**：只读（不写代码）
 
 ## 流程
+
+### Step 0: 读取工作流状态
+
+1. Read `.codebuddy/workflow/state.yaml`，验证 `phase.current == "phase-4-plan"`
+2. 验证前置制品存在：`artifacts.spec.path` 对应的文件存在
+3. 设置 `phase.status = "in_progress"`, `phase.started_at = 当前时间`
 
 ### Step 1: 定位并理解规格文档
 
@@ -62,6 +68,17 @@ references:
 ### Step 4: 更新实施计划索引
 
 在 `docs/实施计划/INDEX.md` 表**顶部**插入新行。
+
+### Phase 出口
+
+1. 如有设计决策被用户确认，创建 `decisions/YYYY-MM-DD-{简述}.md`，更新 `decisions[]` 数组
+2. 更新 `artifacts.plan.path`, `artifacts.plan.updated_at`
+3. Phase 出口：
+   - `phase.status = "completed"`, `phase.completed_at = 当前时间`
+   - `progress.phases_completed.append("phase-4-plan")`
+   - `phase.current = "phase-4.5-coverage-check"`, `phase.status = "pending"`
+   - `metrics_snapshot.phase_durations[phase-4-plan] = 耗时分钟数`
+4. 更新 `session.last_activity = 当前时间`
 
 ## 自检
 

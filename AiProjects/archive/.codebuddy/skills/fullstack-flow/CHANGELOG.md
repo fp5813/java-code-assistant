@@ -1,4 +1,24 @@
-# archive-dev 优化记录
+# fullstack-flow 优化记录
+
+## [17.0.0] - 2026-06-03
+
+### 重大变更 — 技能泛化：archive-dev → fullstack-flow
+
+技能从档案系统专用进化为个人通用全栈开发技能。名称、描述、标签统一重构，领域示例泛化。
+
+#### 修改文件
+
+- **SKILL.md**: v16.12.0 → v17.0.0
+  - `name`: archive-dev → fullstack-flow
+  - `description`: 去除"档案系统"，改为通用"全栈开发流程"
+  - `tags`: archive → fullstack
+  - 标题、skills 列表、正文引用同步更新
+- **phases/*.md** (12 个): frontmatter 的 name 前缀和 tags 更新
+- **references/**: spec-driven-development.md 和 codegraph-reference.md 中的领域示例泛化
+- **关联技能**: archive-change-record / archive-code-standards / archive-code-explore 描述去除"档案"前缀
+- **workflow/state.yaml**: 注释更新
+- **docs/INDEX.md**: 维护原则引用更新
+- **memory/data_source_principles.md**: 引用更新
 
 ## [16.12.0] - 2026-06-03
 
@@ -44,7 +64,7 @@
 #### 修改文件
 
 - **phase-2-probe.md**: Agent B2 拆为 B2-1（API 接口数据获取，通过 VO/DTO 体现业务结构）和 B2-2（DB 真实数据采样，对照 VO 验证映射）；B3 链路标注扩展包含 VO/DTO 赋值步；探路报告新增 L4.5 VO/DTO 数据视图；显式声明 execute_query 仅 SELECT；边界条件上限 2 个场景
-- **phase-2.5-quality-gate.md**: C31 增强 LIMIT 3 覆盖有效性检查；C33 扩展包含数据转换逻辑；新增 C34（VO/DTO 结构检查）、C35（表↔VO 字段映射检查）；总项数 33→36
+- **phase-2.5-quality-gate.md**: C31 增强 LIMIT 3 覆盖有效性检查；C33 扩展包含数据转换逻辑；新增 C34（VO/DTO 结构检查）、C35（表↔VO 字段映射检查）；总项数 33→35
 - **phase-3-spec.md**: 数据来源章节重构为"API 接口数据(VO/DTO)"+"表结构"+"表↔VO 字段映射关系"三部分；自检增加数据章节完整性检查
 - **phase-4.5-coverage-check.md**: 新增第 7 维度"数据来源追溯"，验证规格文档与探路报告之间的数据一致性
 - **SKILL.md**: 更新强制执行规则第 3 条，明确 API 接口采样 + VO/DTO 对照
@@ -66,7 +86,7 @@
 
 ### 新增 — "实践-复盘-沉淀"闭环系统
 
-设计"实践-复盘-沉淀"三层架构，集成到 archive-dev 流程中，每次开发完成后分析根因并驱动技能改进。
+设计"实践-复盘-沉淀"三层架构，集成到 fullstack-flow 流程中，每次开发完成后分析根因并驱动技能改进。
 
 #### 架构
 

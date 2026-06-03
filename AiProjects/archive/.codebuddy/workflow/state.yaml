@@ -1,0 +1,69 @@
+# ============================================
+# fullstack-flow Workflow State v1
+# ============================================
+# 由 Phase 入口/出口自动更新，Agent 禁止手动编辑
+
+workflow:
+  version: 1
+  schema: ".codebuddy/workflow/state.schema.yaml"
+  created_at: "2026-06-02T14:30:00+08:00"
+  updated_at: "2026-06-02T15:38:00+08:00"
+
+session:
+  id: "sess-20260602-004"
+  started_at: "2026-06-02T15:02:00+08:00"
+  last_activity: "2026-06-02T15:38:00+08:00"
+  resume_count: 0
+
+task:
+  id: "task-20260602-005"
+  brief: "移交审核updateStatus接口权限校验"
+  type: feature
+  keywords:
+    - "updateStatus"
+    - "isAllowed"
+    - "processTaskActor"
+    - "NOT_ALLOWED_EXECUTE"
+    - "ArchiveTransferRegistry"
+  source: "用户需求"
+
+phase:
+  current: null
+  status: completed
+  started_at: "2026-06-02T17:10:00+08:00"
+  completed_at: "2026-06-02T17:18:00+08:00"
+  error_count: 1
+
+progress:
+  phases_completed:
+    - phase-1-clarify
+    - phase-2-probe
+    - phase-2.5-quality-gate
+    - phase-3-spec
+    - phase-4-plan
+    - phase-4.5-coverage-check
+    - phase-5-code
+    - phase-5.5-review
+    - phase-6-record
+    - phase-6.5-rule-sync
+    - phase-6.6-audit
+    - phase-6.7-retrospect
+  phases_blocked: []
+  current_step: "全部Phase完成，含复盘，经验证通过"
+
+artifacts:
+  retrospect:
+    path: "docs/复盘记录/2026-06-02-移交审核权限校验复盘.md"
+    updated_at: "2026-06-02T17:18:00+08:00"
+    triggered: true
+    trigger_reason: "Phase 5.5 代码质量问题：getCandidateGroups/getGroupKey 用错 + Dict字段 user_id/id 用错"
+  feedback_memory:
+    path: "memory/feedback_dict_field_check.md"
+    summary: "新增 Dict 字段键名验证规则"
+  plan: null
+  code_changes: []
+  review: null
+  change_record: null
+  rule_sync: null
+  audit_report: null
+  retrospect: null

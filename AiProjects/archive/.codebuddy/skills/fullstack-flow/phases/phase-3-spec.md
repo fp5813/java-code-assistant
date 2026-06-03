@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-3-spec
+name: fullstack-flow/phases/phase-3-spec
 description: "规格澄清：读取探路报告，交互式澄清模糊点（≤5问题/轮），输出 What/Goal/Scope/AC 到规格文档。只读模式。"
 version: 2.1.0
-tags: [archive, codebuddy-only, spec-driven, read-only]
+tags: [fullstack, codebuddy-only, spec-driven, read-only]
 role: codebuddy-specifier
 model: deepseek-v4-flash
 tools: [Read, Grep]
@@ -22,13 +22,13 @@ references:
 
 ## 流程
 
-### Step -1: 读取工作流状态
+### Step 0: 读取工作流状态
 
 1. Read `.codebuddy/workflow/state.yaml`，验证 `phase.current == "phase-3-spec"`
 2. 验证前置制品存在：`artifacts.probe_report.path` 对应的文件存在，`artifacts.gate_2_5.status == "passed"`
 3. 设置 `phase.status = "in_progress"`, `phase.started_at = 当前时间`
 
-### Step 0: 读取探路报告文件（优先于上下文记忆）
+### Step 0a: 读取探路报告文件（优先于上下文记忆）
 
 从文件系统读取最新探路报告，确保基于完整内容而非可能已被压缩的上下文摘要：
 

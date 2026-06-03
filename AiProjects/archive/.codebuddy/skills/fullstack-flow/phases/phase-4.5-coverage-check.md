@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-4.5-coverage-check
+name: fullstack-flow/phases/phase-4.5-coverage-check
 description: "实施计划覆盖验证：检查规格与计划的 AC 覆盖率、文件覆盖率、术语一致性，确保零遗漏后进入 Phase 5。"
 version: 1.2.0
-tags: [archive, codebuddy-only, coverage-check, read-only]
+tags: [fullstack, codebuddy-only, coverage-check, read-only]
 role: codebuddy-analyzer
 model: deepseek-v4-flash
 tools: [Read, Grep, Agent]

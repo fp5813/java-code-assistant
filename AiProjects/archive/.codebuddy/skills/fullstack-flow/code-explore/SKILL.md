@@ -1,6 +1,6 @@
 ---
-name: archive-code-explore
-description: 档案系统代码探路 — 只读分析 BUG 或需求，不修改任何文件。使用 MCP 工具链（codegraph + mysql-archive）调查代码结构、调用链、数据库表结构。建议并行启动多个子代理提升效率。
+name: fullstack-flow/code-explore
+description: 代码探路（fullstack-flow 子技能）— 只读分析 BUG 或需求，不修改任何文件。使用 MCP 工具链（codegraph + mysql-archive）调查代码结构、调用链、数据库表结构。建议并行启动多个子代理提升效率。
 allowed-tools:
   - Read
   - Grep

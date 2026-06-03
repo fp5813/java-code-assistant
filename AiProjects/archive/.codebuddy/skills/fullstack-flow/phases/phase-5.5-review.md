@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-5.5-review
+name: fullstack-flow/phases/phase-5.5-review
 description: "文档代码审核：FE/BE 并行子代理（lite+reasoning 不同模型）核对探路报告/规格/代码质量，主流程做 API 文档一致性比对。"
 version: 2.1.0
-tags: [archive, codebuddy-only, review, documentation, sub-agents]
+tags: [fullstack, codebuddy-only, review, documentation, sub-agents]
 role: codebuddy-reviewer
 model: deepseek-v4-flash
 tools: [Read, Write, Edit, Grep, Agent]

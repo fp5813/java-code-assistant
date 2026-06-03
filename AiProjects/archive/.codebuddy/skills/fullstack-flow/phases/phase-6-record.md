@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-6-record
+name: fullstack-flow/phases/phase-6-record
 description: "修改记录：输出修改记录到 docs/修改记录/，包含前后代码对比和回滚方案（不使用 git 命令）。"
 version: 1.1.0
-tags: [archive, codebuddy-only, record, documentation]
+tags: [fullstack, codebuddy-only, record, documentation]
 role: codebuddy-recorder
 model: deepseek-v4-flash
 tools: [Read, Grep]
@@ -72,7 +72,7 @@ Phase 6 生成的修改记录含完整代码 diff（20-40K tokens），是上下
 | {日期} | [{简述}](./{文件名}) | {一行摘要} |
 ```
 
-### Step 6: 复盘触发检查（Phase 6.7 入口）
+### Step 7: 复盘触发检查（Phase 6.7 入口）
 
 在修改记录末尾追加"复盘触发检查"章节。快速评估是否需要进入 Phase 6.7 复盘回顾：
 

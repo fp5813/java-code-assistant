@@ -1,30 +1,33 @@
 ---
-name: archive-dev
-description: "档案系统全栈开发流程 — 质量门控驱动的规范开发（探路→规格→计划→代码→记录）"
-version: 16.12.0
-tags: [archive, vue3, java, spring-boot, fullstack, codebuddy-only, spec-driven]
-related_skills: [archive-code-explore, archive-test, systematic-debugging, codebase-knowledge-graph]
+name: fullstack-flow
+description: "全栈开发流程 — 质量门控驱动的规范开发（探路→规格→计划→代码→记录→沉淀）"
+version: 17.0.0
+tags: [fullstack, vue3, java, spring-boot, codebuddy-only, spec-driven]
+related_skills: [systematic-debugging, codebase-knowledge-graph]
 role: codebuddy-coder
 skills:
-  - archive-dev/phases/phase-1-clarify
-  - archive-dev/phases/phase-2-probe
-  - archive-dev/phases/phase-2.5-quality-gate
-  - archive-dev/phases/phase-3-spec
-  - archive-dev/phases/phase-4-plan
-  - archive-dev/phases/phase-4.5-coverage-check
-  - archive-dev/phases/phase-5-code
-  - archive-dev/phases/phase-5.5-review
-  - archive-dev/phases/phase-6-record
-  - archive-dev/phases/phase-6.5-rule-sync
-  - archive-dev/phases/phase-6.6-audit
-  - archive-dev/phases/phase-6.7-retrospect
+  - fullstack-flow/phases/phase-1-clarify
+  - fullstack-flow/phases/phase-2-probe
+  - fullstack-flow/phases/phase-2.5-quality-gate
+  - fullstack-flow/phases/phase-3-spec
+  - fullstack-flow/phases/phase-4-plan
+  - fullstack-flow/phases/phase-4.5-coverage-check
+  - fullstack-flow/phases/phase-5-code
+  - fullstack-flow/phases/phase-5.5-review
+  - fullstack-flow/phases/phase-6-record
+  - fullstack-flow/phases/phase-6.5-rule-sync
+  - fullstack-flow/phases/phase-6.6-audit
+  - fullstack-flow/phases/phase-6.7-retrospect
+  - fullstack-flow/change-record
+  - fullstack-flow/code-explore
+  - fullstack-flow/code-standards
 references:
   - references/spec-driven-development.md
   - references/codegraph-reference.md
   - references/mcp-tools-summary.md
 ---
 
-# 档案系统开发（CodeBuddy 专用）
+# 全栈开发流程（CodeBuddy 专用）
 
 > **核心理念**：写代码前先过门控。每一步有制品、有检查、有记录，避免 AI 直接生成导致的返工和遗漏。
 
@@ -75,7 +78,7 @@ CodeBuddy 收到任务后先执行 Phase 1 描述澄清，不依赖任何外部�
 15. **每个 Phase 完成后必须更新对应 INDEX.md**（探路报告/规格文档/实施计划/修改记录/业务规则/接口文档）
 16. **Phase 5.5 审核 API 文档后**：新增接口模块时同步更新 `docs/接口文档/INDEX.md`
 17. **Phase 6.5 处理过期规则**：引用源头已删除的规则标注"已废弃"并直接删除
-18. **docs/只维护有效文档**：archive-dev 流程不读取的目录/文件直接删除，不保留一次性或人工文档
+18. **docs/只维护有效文档**：fullstack-flow 流程不读取的目录/文件直接删除，不保留一次性或人工文档
 19. **Phase 2 探路必须覆盖全路径**：同一功能的所有 UI 入口（列表页/详情弹框/编辑弹框）和数据流封装层（onChange wrapper、componentProps 包裹、formActionType 作用域）
 20. **Phase 5 修改 async 函数必须做竞态分析**：API 返回后检查值是否已变，避免旧响应覆盖新状态
 21. **Phase 6 完成后必须执行"复盘触发检查"四问**：质量门控失败/审核发现缺陷/反复修改/暴露技能盲区，任一"是"则进入 Phase 6.7
@@ -146,7 +149,7 @@ CodeBuddy 收到任务后先执行 Phase 1 描述澄清，不依赖任何外部�
 
 ## Agent 记忆与状态管理
 
-archive-dev 工作流状态由 `.codebuddy/workflow/` 集中管理，取代隐式的制品存在性推断。
+fullstack-flow 工作流状态由 `.codebuddy/workflow/` 集中管理，取代隐式的制品存在性推断。
 
 ### 目录结构
 
@@ -237,7 +240,7 @@ archive-dev 工作流状态由 `.codebuddy/workflow/` 集中管理，取代隐�
 
 ## 上下文管理
 
-archive-dev 流程多阶段连续执行，上下文窗口会随探路报告、规格文档、代码修改等内容增长。已配置自动压缩策略：
+fullstack-flow 流程多阶段连续执行，上下文窗口会随探路报告、规格文档、代码修改等内容增长。已配置自动压缩策略：
 
 - **触发阈值**：上下文达到 130K tokens（约 13%，模型总容量 1000K）时自动压缩
 - **配置方式**：`.codebuddy/.env` 中 `CODEBUDDY_AUTOCOMPACT_PCT_OVERRIDE=13`

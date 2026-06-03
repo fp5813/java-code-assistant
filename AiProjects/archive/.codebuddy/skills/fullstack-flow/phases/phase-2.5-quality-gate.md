@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-2.5-quality-gate
+name: fullstack-flow/phases/phase-2.5-quality-gate
 description: "探路报告质量门控：35 项检查覆盖 L0-L5 完整性、文档查阅、工具规范性。通过率 100% 方可进入 Phase 3。"
 version: 2.1.0
-tags: [archive, codebuddy-only, quality-gate, read-only]
+tags: [fullstack, codebuddy-only, quality-gate, read-only]
 role: codebuddy-gatekeeper
 model: deepseek-v4-flash
 tools: [Read, Grep]

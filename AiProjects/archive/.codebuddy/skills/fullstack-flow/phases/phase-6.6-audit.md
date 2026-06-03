@@ -1,8 +1,8 @@
 ---
-name: archive-dev/phases/phase-6.6-audit
+name: fullstack-flow/phases/phase-6.6-audit
 description: "业务规则审计：codegraph 扫描全项目 6 类业务规则模式（状态判断/枚举/权限/数据过滤），全覆盖识别未归档规则并输出审计报告。"
 version: 1.2.0
-tags: [archive, codebuddy-only, audit, business-rule, read-only]
+tags: [fullstack, codebuddy-only, audit, business-rule, read-only]
 role: codebuddy-auditor
 model: deepseek-v4-flash
 tools: [Read, Grep, Agent]
