@@ -4,9 +4,13 @@ import com.moma.agent.AgentContext;
 import com.moma.agent.AgentLoop;
 import com.moma.agent.SessionManager;
 import com.moma.cli.CliApp;
+import com.moma.concurrent.EventBus;
+import com.moma.context.ContextManager;
+import com.moma.context.ContextWindowRegistry;
 import com.moma.controller.*;
 import com.moma.di.Bean;
 import com.moma.di.Configuration;
+import com.moma.learning.PatternLearner;
 import com.moma.memory.MemorySaveTool;
 import com.moma.memory.MemorySearchTool;
 import com.moma.memory.MemoryStore;
@@ -17,6 +21,7 @@ import com.moma.plan.EnterPlanModeTool;
 import com.moma.plan.ExitPlanModeTool;
 import com.moma.plan.PlanManager;
 import com.moma.security.HardDenyManager;
+import com.moma.service.AgentLearningService;
 import com.moma.skill.SkillManager;
 import com.moma.skill.SkillTool;
 import com.moma.task.*;
@@ -83,6 +88,36 @@ public class DiConfig {
     }
 
     @Bean
+    public EventBus eventBus() {
+        return new EventBus();
+    }
+
+    @Bean
+    public PatternLearner patternLearner() {
+        return new PatternLearner();
+    }
+
+    @Bean
+    public AgentLearningService agentLearningService(EventBus eventBus, MemoryStore memoryStore) {
+        return new AgentLearningService(eventBus, memoryStore);
+    }
+
+    // ───────────────────────────────────────────
+    // 上下文窗口管理
+    // ───────────────────────────────────────────
+
+    @Bean
+    public ContextWindowRegistry contextWindowRegistry() {
+        return new ContextWindowRegistry();
+    }
+
+    @Bean
+    public ContextManager contextManager(ContextWindowRegistry contextWindowRegistry,
+                                          ToolRegistry toolRegistry) {
+        return new ContextManager(contextWindowRegistry, toolRegistry);
+    }
+
+    @Bean
     public ProviderRegistry providerRegistry(AppConfig config) {
         ProviderRegistry registry = new ProviderRegistry();
         registry.register(new OpenAiProvider());
@@ -121,7 +156,8 @@ public class DiConfig {
     public ToolRegistry toolRegistry(HardDenyManager hardDenyManager,
                                      PlanManager planManager,
                                      SkillManager skillManager,
-                                     MemoryStore memoryStore) {
+                                     MemoryStore memoryStore,
+                                     PatternLearner patternLearner) {
         ToolRegistry registry = new ToolRegistry();
         registry.setHardDenyManager(hardDenyManager);
 
@@ -164,6 +200,13 @@ public class DiConfig {
         registry.register(new GhPrListTool());
         registry.register(new GhIssueListTool());
 
+        // ── 墨码开发工具（日志监控 + 自我学习 + 知识库）──
+        registry.register(new MomaLogTool());
+        registry.register(new MomaMonitorTool());
+        registry.register(new SaveExperienceTool(memoryStore));
+        registry.register(new PatternLearnTool(patternLearner));
+        registry.register(new KnowledgeBaseTool());
+
         LOG.info("已注册 {} 个工具", registry.size());
         return registry;
     }
@@ -188,8 +231,10 @@ public class DiConfig {
     @Bean
     public AgentLoop agentLoop(Supplier<ChatLanguageModel> modelSupplier,
                                ToolRegistry toolRegistry,
-                               AgentContext agentContext) {
-        return new AgentLoop(modelSupplier, toolRegistry, agentContext);
+                               AgentContext agentContext,
+                               ContextManager contextManager,
+                               SkillManager skillManager) {
+        return new AgentLoop(modelSupplier, toolRegistry, agentContext, contextManager, skillManager);
     }
 
     // ───────────────────────────────────────────
@@ -204,14 +249,18 @@ public class DiConfig {
                                                        TaskManager taskManager,
                                                        AgentContext agentContext,
                                                        AgentLoop agentLoop,
-                                                       MemoryStore memoryStore) {
+                                                       MemoryStore memoryStore,
+                                                       ContextManager contextManager,
+                                                       SkillManager skillManager,
+                                                       PatternLearner patternLearner) {
         return List.of(
             new ProviderController(providerRegistry),
             new PlanController(planManager, agentContext, agentLoop),
             new TaskController(taskManager),
             new MemoryController(memoryStore, agentContext),
             new StatusController(providerRegistry, toolRegistry, planManager,
-                taskManager, agentContext, config)
+                taskManager, agentContext, config, contextManager),
+            new MomaDevController(skillManager, patternLearner, memoryStore)
         );
     }
 
@@ -230,9 +279,10 @@ public class DiConfig {
                          HardDenyManager hardDenyManager,
                          SkillManager skillManager,
                          MemoryStore memoryStore,
+                         AgentLearningService learningService,
                          List<CommandController> controllers) {
         return new CliApp(config, providerRegistry, toolRegistry, agentContext,
             agentLoop, planManager, taskManager, hardDenyManager,
-            skillManager, memoryStore, controllers);
+            skillManager, memoryStore, learningService, controllers);
     }
 }

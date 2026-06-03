@@ -1,0 +1,115 @@
+{
+  "projects": {
+    "claude-code": {
+      "name": "Claude Code",
+      "description": "Anthropic 官方 AI 编程助手，终端中的 Agentic 编码工具",
+      "key_patterns": [
+        "perceive-think-act Agent 循环",
+        "tool_use 原生支持（Anthropic API 原生协议）",
+        "系统提示词分层设计（base + mode-specific hints）",
+        "文件编辑采用增量 patch 模式",
+        "子代理(Sub-agent) 架构 — 代表团授权",
+        "Plan Mode — 先规划后执行",
+        "Hard Deny 安全规则引擎"
+      ],
+      "learned_from": [
+        "Agent Loop 的整体架构",
+        "Plan Mode 的设计理念",
+        "工具编排策略（只读并发 + 写串行）",
+        "HardDeny 安全机制",
+        "Task 管理系统"
+      ]
+    },
+    "hermes": {
+      "name": "Hermes",
+      "description": "开源 AI 编程助手，Rust 实现的高性能 Agent",
+      "key_patterns": [
+        "基于 tree-sitter 的语义代码分析和 AST 操作",
+        "增量 diff 编辑策略（只修改变更部分）",
+        "多 Provider 热切换（运行时切换 LLM 后端）",
+        "结构化工具调用协议"
+      ],
+      "learned_from": [
+        "多 Provider 热切换机制的设计思路",
+        "增量编辑策略的参考实现"
+      ]
+    },
+    "opencode": {
+      "name": "OpenCode",
+      "description": "开源终端 AI 编程助手，注重 UX 体验",
+      "key_patterns": [
+        "模态编辑（Normal/Insert 模式，类似 Vim）",
+        "Inline 代码补全",
+        "会话上下文窗口管理",
+        "文件操作历史追踪"
+      ],
+      "learned_from": [
+        "REPL 交互模式的改进方向",
+        "上下文窗口管理的优化思路"
+      ]
+    }
+  },
+  "patterns": {
+    "tool_orchestration": {
+      "description": "工具编排策略",
+      "approaches": [
+        "只读工具并发执行 + 写工具串行执行",
+        "批量工具调用（一次 LLM 调用返回多个 tool_use）",
+        "工具结果缓存避免重复调用",
+        "工具预热（提前加载工具定义）"
+      ],
+      "current": "只读并发(Java 21 虚拟线程) + 写串行",
+      "improvement_ideas": [
+        "工具结果去重",
+        "工具依赖图排序",
+        "工具热点缓存"
+      ]
+    },
+    "context_management": {
+      "description": "上下文窗口管理",
+      "approaches": [
+        "滑动窗口裁剪（保留最新 N 条消息）",
+        "LLM 摘要压缩（将历史对话压缩为摘要）",
+        "选择性遗忘（按重要性保留消息）",
+        "分层存储（短期内存 + 长期记忆）"
+      ],
+      "current": "65%/80% 两级阈值：Token 裁剪 + LLM 摘要压缩",
+      "improvement_ideas": [
+        "消息重要性评分",
+        "分层摘要（dialogue-level + task-level）",
+        "上下文预热"
+      ]
+    },
+    "di_container": {
+      "description": "依赖注入模式",
+      "approaches": [
+        "Spring IoC 容器",
+        "轻量级自定义 DI",
+        "手动构造器注入",
+        "服务定位器模式"
+      ],
+      "current": "自定义注解驱动 DI（@Component/@Configuration/@Bean/@Inject/@Value）",
+      "improvement_ideas": [
+        "AOP 拦截器",
+        "条件注入 @Conditional",
+        "生命周期回调扩展"
+      ]
+    },
+    "self_learning": {
+      "description": "自我学习与进化",
+      "approaches": [
+        "跨会话记忆持久化",
+        "经验回放",
+        "模式识别与建议",
+        "自动单元测试生成"
+      ],
+      "current": "MemoryStore 跨会话记忆 + ContextManager 自适应裁剪",
+      "improvement_ideas": [
+        "自动经验保存",
+        "代码模式学习 (PatternLearner)",
+        "日志分析驱动优化",
+        "运行时指标监控告警"
+      ]
+    }
+  }
+}

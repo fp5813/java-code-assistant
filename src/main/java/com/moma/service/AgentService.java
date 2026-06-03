@@ -6,6 +6,8 @@ import com.moma.di.PostConstruct;
 import com.moma.agent.AgentContext;
 import com.moma.agent.AgentLoop;
 import com.moma.agent.SystemPrompt;
+import com.moma.context.ContextManager;
+import com.moma.skill.SkillManager;
 import com.moma.tool.ToolRegistry;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -25,6 +27,8 @@ public class AgentService {
     private final AgentContext agentContext;
     private final MessageService messageService;
     private final ToolOrchestrationService toolOrchestrationService;
+    private final ContextManager contextManager;
+    private final SkillManager skillManager;
 
     private AgentLoop agentLoop;
 
@@ -33,17 +37,21 @@ public class AgentService {
                         ToolRegistry toolRegistry,
                         AgentContext agentContext,
                         MessageService messageService,
-                        ToolOrchestrationService toolOrchestrationService) {
+                        ToolOrchestrationService toolOrchestrationService,
+                        ContextManager contextManager,
+                        SkillManager skillManager) {
         this.modelSupplier = modelSupplier;
         this.toolRegistry = toolRegistry;
         this.agentContext = agentContext;
         this.messageService = messageService;
         this.toolOrchestrationService = toolOrchestrationService;
+        this.contextManager = contextManager;
+        this.skillManager = skillManager;
     }
 
     @PostConstruct
     public void init() {
-        this.agentLoop = new AgentLoop(modelSupplier, toolRegistry, agentContext);
+        this.agentLoop = new AgentLoop(modelSupplier, toolRegistry, agentContext, contextManager, skillManager);
     }
 
     /**

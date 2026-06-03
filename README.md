@@ -197,19 +197,27 @@ Switch at runtime without restart:
 ### Project Structure
 
 ```
-src/main/java/com/codeassist/
+src/main/java/com/moma/
 ├── CodeAssistant.java          # Main entry
 ├── cli/                        # REPL + command parsing
 ├── agent/                      # perceive-think-act loop
-├── tool/                       # 20+ tool implementations
+├── tool/                       # 25+ tool implementations
 ├── model/                      # Provider registry + hot-switching
 ├── config/                     # Settings (env + JSON)
+├── di/                         # Custom DI container
+├── controller/                 # Command controllers
+├── service/                    # Service layer
+├── repository/                 # Data persistence
+├── cache/                      # Cache system (Local + Redis)
+├── concurrent/                 # Thread pools + EventBus
+├── context/                    # Context window management
 ├── security/                   # HardDeny rule engine
 ├── task/                       # Task management system
 ├── plan/                       # Planning mode
-├── skill/                      # 4 built-in skills
+├── skill/                      # 5 built-in skills
 ├── memory/                     # Cross-session memory
-└── lsp/                        # LSP protocol client
+├── learning/                   # Pattern analysis
+├── lsp/                        # LSP client
 ```
 
 ### Agent Loop
@@ -230,7 +238,7 @@ while (not complete) {
 
 ---
 
-## Tools Reference (21 tools)
+## Tools Reference (28 tools)
 
 | Tool | Read-Only | Description |
 |------|-----------|-------------|
@@ -249,12 +257,19 @@ while (not complete) {
 | TaskGet | ✓ | View task details |
 | EnterPlanMode | | Enter planning mode |
 | ExitPlanMode | | Exit planning mode |
-| Skill | | Activate a skill (code review, etc.) |
+| Skill | | Activate a skill (5 available) |
 | MemorySave | | Save cross-session memory |
 | MemorySearch | ✓ | Search saved memories |
 | HtmlOutput | | Generate HTML report + browser open |
 | Lsp | ✓ | LSP code diagnostics |
-| ToolSearch | ✓ | Find available tools |
+| GhPrCreate | | Create GitHub PR |
+| GhPrList | ✓ | List GitHub PRs |
+| GhIssueList | ✓ | List GitHub Issues |
+| MomaLog | ✓ | Read and analyze MoMa logs |
+| MomaMonitor | ✓ | Runtime metrics (tokens, JVM, tools) |
+| SaveExperience | | Save development experience to memory |
+| PatternLearn | ✓ | Analyze code patterns and git history |
+| KnowledgeSearch | ✓ | Search architecture reference knowledge |
 
 ---
 
@@ -271,7 +286,7 @@ cp .env.example .env
 java -jar target/moma.jar
 
 # Run from source
-mvn exec:java -Dexec.mainClass="com.codeassist.CodeAssistant"
+mvn exec:java -Dexec.mainClass="com.moma.CodeAssistant"
 ```
 
 ---
@@ -280,4 +295,4 @@ mvn exec:java -Dexec.mainClass="com.codeassist.CodeAssistant"
 
 **MIT License** © 2026
 
-Built with [LangChain4j](https://github.com/langchain4j/langchain4j), inspired by [MiniClaude](https://github.com/txl16095/MiniClaude) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Built with [LangChain4j](https://github.com/langchain4j/langchain4j), inspired by  [Claude Code](https://docs.anthropic.com/en/docs/claude-code).

@@ -16,6 +16,7 @@ public class AgentContext {
     private final String currentModel;
     private TaskManager taskManager;
     private boolean planMode;
+    private String activeSkill;
 
     /** Token 使用统计 */
     private int inputTokens;
@@ -50,6 +51,11 @@ public class AgentContext {
 
     public void setPlanMode(boolean planMode) { this.planMode = planMode; }
 
+    // ─── Active Skill ───
+
+    public String getActiveSkill() { return activeSkill; }
+    public void setActiveSkill(String skillName) { this.activeSkill = skillName; }
+
     // ─── 统计 ───
 
     public void recordTokens(int input, int output) {
@@ -58,6 +64,15 @@ public class AgentContext {
     }
 
     public void recordToolCall() { this.totalToolCalls++; }
+
+    /**
+     * 重置 Token 和工具调用统计。
+     */
+    public void resetStats() {
+        this.inputTokens = 0;
+        this.outputTokens = 0;
+        this.totalToolCalls = 0;
+    }
 
     public int getInputTokens() { return inputTokens; }
     public int getOutputTokens() { return outputTokens; }

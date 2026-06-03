@@ -12,6 +12,7 @@ import com.moma.model.OpenAiProvider;
 import com.moma.model.ProviderRegistry;
 import com.moma.plan.PlanManager;
 import com.moma.security.HardDenyManager;
+import com.moma.service.AgentLearningService;
 import com.moma.skill.SkillManager;
 import com.moma.skill.SkillTool;
 import com.moma.task.*;
@@ -41,7 +42,7 @@ public class CliApp {
     private static final Logger LOG = LoggerFactory.getLogger(CliApp.class);
 
     private static final String APP_NAME = "\u001B[36m墨码 (MoMa)\u001B[0m";
-    private static final String PROMPT = "\u001B[32m>\u001B[0m ";
+    private static final String PROMPT_BASE = "\u001B[32m>\u001B[0m ";
 
     private final AppConfig config;
     private final ProviderRegistry providerRegistry;
@@ -53,6 +54,7 @@ public class CliApp {
     private final HardDenyManager hardDenyManager;
     private final SkillManager skillManager;
     private final MemoryStore memoryStore;
+    private final AgentLearningService learningService;
 
     /** 自动注入的所有命令控制器 */
     private final List<CommandController> controllers;
@@ -71,6 +73,7 @@ public class CliApp {
                   HardDenyManager hardDenyManager,
                   SkillManager skillManager,
                   MemoryStore memoryStore,
+                  AgentLearningService learningService,
                   List<CommandController> controllers) {
         this.config = config;
         this.providerRegistry = providerRegistry;
@@ -82,6 +85,7 @@ public class CliApp {
         this.hardDenyManager = hardDenyManager;
         this.skillManager = skillManager;
         this.memoryStore = memoryStore;
+        this.learningService = learningService;
         this.controllers = controllers;
     }
 
@@ -121,6 +125,16 @@ public class CliApp {
     }
 
     /**
+     * 创建 JLine 解析器。
+     * 清空未闭合括号的 EOF 触发列表，避免括号/引号未闭合时 REPL 卡在 "More?" 提示。
+     */
+    private static DefaultParser createParser() {
+        DefaultParser parser = new DefaultParser();
+        parser.setEofOnUnclosedBracket(); // 清空列表，不将任何括号视为 EOF
+        return parser;
+    }
+
+    /**
      * 启动 REPL 循环。
      */
     public void start() {
@@ -128,22 +142,27 @@ public class CliApp {
                 .system(true)
                 .build()) {
 
+            // ── 动态命令补全：从 CommandParser 获取所有已注册命令 ──
+            List<String> allCommands = commandParser.getCommandNames();
+            String[] completions = allCommands.stream()
+                .map(c -> "/" + c)
+                .toArray(String[]::new);
+
             LineReader reader = LineReaderBuilder.builder()
                 .terminal(terminal)
-                .parser(new DefaultParser())
-                .completer(new StringsCompleter(
-                    "/help", "/clear", "/exit", "/status",
-                    "/model", "/provider", "/sessions", "/plan", "/memory"
-                ))
+                .parser(createParser())
+                .completer(new StringsCompleter(completions))
                 .variable(LineReader.HISTORY_FILE,
                     java.nio.file.Paths.get(System.getProperty("user.home"), ".ca_history"))
+                .variable(LineReader.HISTORY_SIZE, 1000)
+                .option(LineReader.Option.CASE_INSENSITIVE_SEARCH, true)
                 .build();
 
             printWelcome();
 
             while (running) {
                 try {
-                    String line = reader.readLine(PROMPT);
+                    String line = reader.readLine(PROMPT_BASE + buildStatusPrompt());
 
                     if (line == null) {
                         System.out.println();
@@ -153,6 +172,39 @@ public class CliApp {
                     String input = line.trim();
                     if (input.isEmpty()) {
                         continue;
+                    }
+
+                    // ── 多行输入支持 ──
+                    // 以 \ 结尾 → 续行输入
+                    // 以 { 结尾或以 .startChar 结束 → 自动进入多行模式
+                    if (input.endsWith("\\") || input.endsWith("{")
+                        || input.endsWith("(") || input.endsWith("[")) {
+                        StringBuilder multiLine = new StringBuilder();
+                        if (input.endsWith("\\")) {
+                            multiLine.append(input.substring(0, input.length() - 1));
+                        } else {
+                            multiLine.append(input).append("\n");
+                        }
+
+                        String contPrompt = "\u001B[90m... \u001B[0m";
+                        while (true) {
+                            String next = reader.readLine(contPrompt);
+                            if (next == null) break;
+                            String nextTrim = next.trim();
+                            if (nextTrim.isEmpty()) break;
+                            if (nextTrim.endsWith("\\")) {
+                                multiLine.append(nextTrim, 0, nextTrim.length() - 1);
+                            } else {
+                                multiLine.append(nextTrim);
+                                // 继续检查是否需要更多行
+                                if (!nextTrim.endsWith("{") && !nextTrim.endsWith("(")
+                                    && !nextTrim.endsWith("[") && !nextTrim.endsWith(",")) {
+                                    break;
+                                }
+                                multiLine.append(" ");
+                            }
+                        }
+                        input = multiLine.toString().trim();
                     }
 
                     if (commandParser.isCommand(input)) {
@@ -186,6 +238,10 @@ public class CliApp {
                     System.out.println("\n\u001B[90m已中断\u001B[0m");
                 }
             }
+
+            // ── 会话结束时自动生成学习摘要 ──
+            generateSessionSummary();
+
         } catch (IOException e) {
             LOG.error("终端初始化失败", e);
             System.err.println("错误: 无法初始化终端 - " + e.getMessage());
@@ -224,6 +280,11 @@ public class CliApp {
             sb.append("  /tasks                 显示任务列表\n");
             sb.append("  /tasks clear           清除所有任务\n");
             sb.append("  /sessions              显示历史会话列表\n");
+            sb.append("  /memory [keyword]      搜索跨会话记忆\n");
+            sb.append("  /skills [name]         列出/查看技能详情\n");
+            sb.append("  /learn                 分析项目代码模式\n");
+            sb.append("  /experience [keyword]  搜索开发经验\n");
+            sb.append("\u001B[90m多行输入: 行尾加 \\ 续行，或以 { ( [ 结尾进入多行模式\u001B[0m\n");
             return new CommandParser.CommandResult(true, sb.toString(), null);
         });
 
@@ -281,5 +342,48 @@ public class CliApp {
             response.inputTokens(),
             response.outputTokens(),
             response.totalToolCalls());
+    }
+
+    /**
+     * 构建左侧状态提示（显示当前 plan/skill/model 状态）。
+     */
+    private String buildStatusPrompt() {
+        StringBuilder sb = new StringBuilder("\u001B[90m");
+        if (planManager.isPlanMode()) {
+            sb.append("📋plan ");
+        }
+        String skillName = agentContext.getActiveSkill();
+        if (skillName != null && !skillName.isBlank()) {
+            sb.append("🎯").append(skillName).append(" ");
+        }
+        String modelName = providerRegistry.getActiveModel();
+        if (modelName != null && !modelName.isBlank()) {
+            String shortModel = modelName.length() > 15 ? modelName.substring(0, 14) + "…" : modelName;
+            sb.append("💬").append(shortModel).append(" ");
+        }
+        sb.append("\u001B[0m");
+        return sb.toString();
+    }
+
+    /**
+     * 会话结束时自动生成学习摘要并保存到 MemoryStore。
+     */
+    private void generateSessionSummary() {
+        try {
+            String sessionId = new SessionManager().getSessionId();
+            int messageCount = agentLoop.getMessageHistory().size();
+            String summary = learningService.generateSessionSummary(
+                sessionId,
+                messageCount,
+                agentContext.getInputTokens(),
+                agentContext.getOutputTokens(),
+                agentContext.getTotalToolCalls(),
+                null  // modifiedFiles 需要额外跟踪，暂时传 null
+            );
+            LOG.info("会话摘要已自动保存: {}", sessionId);
+            System.out.println("\u001B[90m📝 本次会话经验已自动保存到记忆系统\u001B[0m");
+        } catch (Exception e) {
+            LOG.debug("会话摘要生成失败（非关键）: {}", e.getMessage());
+        }
     }
 }

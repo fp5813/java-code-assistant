@@ -1,8 +1,11 @@
 package com.moma.agent;
 
+import com.moma.skill.Skill;
+import com.moma.skill.SkillManager;
+
 /**
  * 系统提示词模板。
- * 定义 Agent 的角色和行为准则，支持计划模式切换。
+ * 定义 Agent 的角色和行为准则，支持计划模式切换和技能激活。
  */
 public class SystemPrompt {
 
@@ -65,12 +68,36 @@ public class SystemPrompt {
      * 根据上下文生成系统提示词。
      */
     public static String build(AgentContext context) {
+        return build(context, null);
+    }
+
+    /**
+     * 根据上下文生成系统提示词（含技能提示词注入）。
+     */
+    public static String build(AgentContext context, SkillManager skillManager) {
         String planHint = context.isPlanMode() ? PLAN_MODE_HINT : EXECUTION_MODE_HINT;
-        return BASE_PROMPT.formatted(
+        String basePrompt = BASE_PROMPT.formatted(
             planHint,
             context.getWorkingDirectory(),
             context.getProjectName(),
             context.getCurrentModel()
         );
+
+        // 注入激活技能的提示词（如果有）
+        if (skillManager != null && context.getActiveSkill() != null) {
+            var skillOpt = skillManager.getSkill(context.getActiveSkill());
+            if (skillOpt.isPresent()) {
+                Skill skill = skillOpt.get();
+                basePrompt += """
+
+                    ---
+                    ## 激活的技能: """ + skill.name() + """
+                    """ + skill.prompt() + """
+                    ---
+                    """;
+            }
+        }
+
+        return basePrompt;
     }
 }

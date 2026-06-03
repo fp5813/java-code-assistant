@@ -29,7 +29,7 @@ public class SkillTool implements Tool<SkillTool.Input, String> {
 
     @Override
     public String description() {
-        return "激活指定的技能来改变行为模式。可用技能: code-review（代码审查）, test-generation（测试生成）, refactoring（重构）, bug-fix（Bug 修复）。";
+        return "激活指定的技能来改变行为模式。可用技能: code-review（代码审查）, test-generation（测试生成）, refactoring（重构）, bug-fix（Bug 修复）, moma-dev（墨码项目开发）。";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class SkillTool implements Tool<SkillTool.Input, String> {
             "properties": {
                 "skillName": {
                     "type": "string",
-                    "description": "技能名称: code-review / test-generation / refactoring / bug-fix"
+                    "description": "技能名称: code-review / test-generation / refactoring / bug-fix / moma-dev"
                 }
             },
             "required": ["skillName"]
@@ -57,6 +57,7 @@ public class SkillTool implements Tool<SkillTool.Input, String> {
                     .map(Skill::name).toList());
         }
         Skill skill = skillOpt.get();
+        context.setActiveSkill(input.skillName());
         return "✅ 已激活技能: " + skill.name() + "\n" + skill.description()
             + "\n\n" + skill.prompt();
     }

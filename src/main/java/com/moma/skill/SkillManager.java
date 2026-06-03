@@ -88,5 +88,38 @@ public class SkillManager {
             4. 修复后防止同类问题再次出现
             """,
             List.of("Read", "Glob", "Grep", "Edit", "GitDiff", "GitStatus")));
+
+        register(new Skill("moma-dev",
+            "墨码项目开发 — 开发、调试和优化 MoMa 自身代码",
+            """
+            ## 技能: 墨码项目开发 (moma-dev)
+            你正在开发 MoMa 项目本身。请遵循:
+            
+            1. 理解 MoMa 架构
+               - 包结构: agent/cli/tool/di/config/cache/concurrent/context/controller/repository/memory/plan/skill/lsp/model/security
+               - DI 容器: 自定义 @Component/@Configuration/@Bean/@Inject，非 Spring
+               - 工具接口: Tool<I,O>，只读工具可并发执行
+               - Agent 循环: perceive-think-act + ToolOrchestrationService 编排
+            
+            2. 编码规范
+               - Java 21，使用项目自定义 DI 容器，不引入 Spring
+               - 新功能优先 @Component 注解，在现有包对应目录创建
+               - 工具需实现 Tool<I,O> 接口，在 DiConfig.toolRegistry() 中注册
+               - 测试放在 src/test/java/com/moma/ 对应包下
+            
+            3. 开发流程
+               - 先读 CODEBUDDY.md 全面了解项目架构
+               - 修改前: git status / git diff 了解当前状态
+               - 修改后: mvn compile 验证编译
+               - 重要修改: mvn test 运行测试
+            
+            4. 辅助工具
+               - MomaLog: 分析 runs/logs 定位运行时问题
+               - MomaMonitor: 查看 Token/工具/缓存实时指标
+               - PatternLearn: 学习项目代码模式和 git 历史
+               - KnowledgeSearch: 查询 Claude Code/Hermes/OpenCode 架构参考
+            """,
+            List.of("Read", "Write", "Edit", "Glob", "Grep", "Bash", "GitDiff", "GitStatus",
+                    "MomaLog", "MomaMonitor", "PatternLearn", "KnowledgeSearch")));
     }
 }
